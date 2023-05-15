@@ -33,3 +33,7 @@ class MissingArrayIndexException(BaseException):
 
 class NoneValuesAccessedException(BaseException):
     pass
+
+
+class InvalidJSONPathException(BaseException):
+    pass
