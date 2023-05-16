@@ -18,6 +18,7 @@ from .exceptions import BaseException
 
 Scalar = Union[float, str, bool]
 Nodal = Union[Scalar, Dict[str, "Nodal"], List["Nodal"]]
+S = TypeVar("S", bound="Node")
 
 
 class CanGetItem(Protocol):
@@ -46,22 +47,19 @@ class Node(ABC):
     def intersects(self, row: CanGetItem) -> bool:
         ...
 
-
-S = TypeVar("S", bound=Node)
-
-
-def cached(
-    intersects: Callable[[S, CanGetItem], bool]
-) -> Callable[[S, CanGetItem], bool]:
-    @wraps(intersects)
-    def cached_intersects(self: S, row: CanGetItem) -> bool:
-        if self._last_checked_row is row:
+    @staticmethod
+    def cached(
+        intersects: Callable[[S, CanGetItem], bool]
+    ) -> Callable[[S, CanGetItem], bool]:
+        @wraps(intersects)
+        def cached_intersects(self: S, row: CanGetItem) -> bool:
+            if self._last_checked_row is row:
+                return self._intersected_last_time
+            self._intersected_last_time = intersects(self, row)
+            self._last_checked_row = row
             return self._intersected_last_time
-        self._intersected_last_time = intersects(self, row)
-        self._last_checked_row = row
-        return self._intersected_last_time
 
-    return cached_intersects
+        return cached_intersects
 
 
 class LeafNode(Node):
@@ -73,7 +71,7 @@ class LeafNode(Node):
         result = row[self.jsonpath]
         return cast(Scalar, result)
 
-    @cached
+    @Node.cached
     def intersects(self, row: CanGetItem) -> bool:
         return row[self.jsonpath] is not None
 
@@ -98,7 +96,7 @@ class InternalNode(Node):
             )
         self.childrens[key] = child
 
-    @cached
+    @Node.cached
     def intersects(self, row: CanGetItem) -> bool:
         return any(map(lambda node: node.intersects(row), self.childrens.values()))
 
