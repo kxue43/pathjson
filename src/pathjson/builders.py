@@ -12,7 +12,7 @@ from typing import (
 )
 
 # Own
-from .exceptions import InvalidJSONPathException
+from .exceptions import BaseException
 from ._nodes import (
     ArrayNode,
     CanGetItem,
@@ -41,6 +41,9 @@ class JsonifyFunctionBuilder(Generic[T]):
     _JSONPATH: ClassVar[Pattern] = re.compile(
         r"^(?P<head>\$(\.[a-zA-Z]\w*|\[\d+\])*)(?P<tail>\.[a-zA-Z]\w*|\[\d+\])$"
     )
+
+    class InvalidJSONPathException(BaseException):
+        pass
 
     def __init__(self, leaf_jsonpaths: Iterable[str]) -> None:
         if isinstance(leaf_jsonpaths, list):
@@ -84,7 +87,7 @@ class JsonifyFunctionBuilder(Generic[T]):
     def _get_parent_jsonpath(self, child: str) -> str:
         match = self._JSONPATH.match(child)
         if match is None:
-            raise InvalidJSONPathException(
+            raise self.InvalidJSONPathException(
                 rf"""
                 JSONPath `{child}` is invalid. Allowed pattern is
                 `"^(\$\.[a-zA-Z]\w*|\[\d+\])*(\.[a-zA-Z]\w*|\[\d+\])$"`.
@@ -95,7 +98,7 @@ class JsonifyFunctionBuilder(Generic[T]):
     def _get_child_key_in_parent(self, child: str) -> str:
         match = self._JSONPATH.match(child)
         if match is None:
-            raise InvalidJSONPathException(
+            raise self.InvalidJSONPathException(
                 rf"""
                 JSONPath `{child}` is invalid. Allowed pattern is
                 `"^(\$\.[a-zA-Z]\w*|\[\d+\])*(\.[a-zA-Z]\w*|\[\d+\])$"`.

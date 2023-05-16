@@ -13,11 +13,7 @@ from typing import (
 )
 
 # Own
-from .exceptions import (
-    DuplicateNodeAdditionException,
-    MissingArrayIndexException,
-    NoneValuesAccessedException,
-)
+from .exceptions import BaseException
 
 
 Scalar = Union[float, str, bool]
@@ -33,6 +29,9 @@ class Node(ABC):
     jsonpath: str
     _last_checked_row: Optional[CanGetItem]
     _intersected_last_time: bool
+
+    class NoneValuesAccessedException(BaseException):
+        pass
 
     def __init__(self, jsonpath: str) -> None:
         self.jsonpath = jsonpath
@@ -68,7 +67,7 @@ def cached(
 class LeafNode(Node):
     def get_value(self, row: CanGetItem) -> Scalar:
         if not self.intersects(row):
-            raise NoneValuesAccessedException(
+            raise self.NoneValuesAccessedException(
                 f"Value at JSONPath `{self.jsonpath}` is `None`."
             )
         result = row[self.jsonpath]
@@ -82,13 +81,16 @@ class LeafNode(Node):
 class InternalNode(Node):
     childrens: Dict[str, Node]
 
+    class DuplicateNodeAdditionException(BaseException):
+        pass
+
     def __init__(self, jsonpath: str) -> None:
         super().__init__(jsonpath)
         self.childrens = {}
 
     def add_child(self, key: str, child: Node) -> None:
         if key in self.childrens:
-            raise DuplicateNodeAdditionException(
+            raise self.DuplicateNodeAdditionException(
                 f"""
                 Child node `{child.jsonpath}` was added to parent node `{self.jsonpath}`
                 more than once during model-building.
@@ -104,7 +106,7 @@ class InternalNode(Node):
 class ObjectNode(InternalNode):
     def get_value(self, row: CanGetItem) -> Dict[str, Nodal]:
         if not self.intersects(row):
-            raise NoneValuesAccessedException(
+            raise self.NoneValuesAccessedException(
                 f"Values at JSONPaths `{self.jsonpath}***` are all `None`."
             )
         return {
@@ -115,15 +117,18 @@ class ObjectNode(InternalNode):
 
 
 class ArrayNode(InternalNode):
+    class MissingArrayIndexException(BaseException):
+        pass
+
     def get_value(self, row: CanGetItem) -> List[Nodal]:
         if not self.intersects(row):
-            raise NoneValuesAccessedException(
+            raise self.NoneValuesAccessedException(
                 f"Values at JSONPaths `{self.jsonpath}***` are all `None`."
             )
         length = len(self.childrens)
         for n in range(0, length):
             if str(n) not in self.childrens:
-                raise MissingArrayIndexException(
+                raise self.MissingArrayIndexException(
                     f"Missing a JSONPath of the format `{self.jsonpath}[{n}]***`."
                 )
         list_: List[Nodal] = []

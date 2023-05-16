@@ -21,19 +21,3 @@ class BaseException(Exception):
                 self.args = (one_line_exception_message, *self.args[1:])
 
         return wrapped_init_method
-
-
-class DuplicateNodeAdditionException(BaseException):
-    pass
-
-
-class MissingArrayIndexException(BaseException):
-    pass
-
-
-class NoneValuesAccessedException(BaseException):
-    pass
-
-
-class InvalidJSONPathException(BaseException):
-    pass
