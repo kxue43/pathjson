@@ -61,15 +61,28 @@ class Node(ABC):
 
         return cached_intersects
 
+    @staticmethod
+    def protected(
+        get_value: Callable[[S, CanGetItem], Nodal]
+    ) -> Callable[[S, CanGetItem], Nodal]:
+        @wraps(get_value)
+        def protected_get_value(self: S, row: CanGetItem) -> Nodal:
+            if not self.intersects(row):
+                error_message = (
+                    f"Values at JSONPaths `{self.jsonpath}***` are all `None`."
+                    if hasattr(self, "childrens")
+                    else f"Value at JSONPath `{self.jsonpath}` is `None`."
+                )
+                raise self.NoneValuesAccessedException(error_message)
+            return get_value(self, row)
+
+        return protected_get_value
+
 
 class LeafNode(Node):
+    @Node.protected
     def get_value(self, row: CanGetItem) -> Scalar:
-        if not self.intersects(row):
-            raise self.NoneValuesAccessedException(
-                f"Value at JSONPath `{self.jsonpath}` is `None`."
-            )
-        result = row[self.jsonpath]
-        return cast(Scalar, result)
+        return cast(Scalar, row[self.jsonpath])
 
     @Node.cached
     def intersects(self, row: CanGetItem) -> bool:
@@ -102,11 +115,8 @@ class InternalNode(Node):
 
 
 class ObjectNode(InternalNode):
+    @Node.protected
     def get_value(self, row: CanGetItem) -> Dict[str, Nodal]:
-        if not self.intersects(row):
-            raise self.NoneValuesAccessedException(
-                f"Values at JSONPaths `{self.jsonpath}***` are all `None`."
-            )
         return {
             key: node.get_value(row)
             for key, node in self.childrens.items()
@@ -118,11 +128,8 @@ class ArrayNode(InternalNode):
     class MissingArrayIndexException(BaseException):
         pass
 
+    @Node.protected
     def get_value(self, row: CanGetItem) -> List[Nodal]:
-        if not self.intersects(row):
-            raise self.NoneValuesAccessedException(
-                f"Values at JSONPaths `{self.jsonpath}***` are all `None`."
-            )
         length = len(self.childrens)
         for n in range(0, length):
             if str(n) not in self.childrens:
