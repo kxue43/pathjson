@@ -1,6 +1,7 @@
 # Builtin
+from __future__ import annotations
+from collections.abc import Iterable
 import re
-import sys
 from typing import (
     Callable,
     ClassVar,
@@ -22,12 +23,6 @@ from ._nodes import (
     Node,
     ObjectNode,
 )
-
-
-if sys.version_info.minor == 8:
-    from typing import Iterable
-elif sys.version_info.minor >= 9:
-    from collections.abc import Iterable
 
 
 T = TypeVar("T", bound=CanGetItem)
