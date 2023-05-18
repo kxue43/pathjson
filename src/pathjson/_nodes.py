@@ -71,7 +71,7 @@ class Node(ABC):
             if not self.intersects(row):
                 error_message = (
                     f"Values at JSONPaths `{self.jsonpath}***` are all `None`."
-                    if hasattr(self, "childrens")
+                    if hasattr(self, "children")
                     else f"Value at JSONPath `{self.jsonpath}` is `None`."
                 )
                 raise self.NoneValuesAccessedException(error_message)
@@ -91,28 +91,28 @@ class LeafNode(Node):
 
 
 class InternalNode(Node):
-    childrens: Dict[str, Node]
+    children: Dict[str, Node]
 
     class DuplicateNodeAdditionException(BaseException):
         pass
 
     def __init__(self, jsonpath: str) -> None:
         super().__init__(jsonpath)
-        self.childrens = {}
+        self.children = {}
 
     def add_child(self, key: str, child: Node) -> None:
-        if key in self.childrens:
+        if key in self.children:
             raise self.DuplicateNodeAdditionException(
                 f"""
                 Child node `{child.jsonpath}` was added to parent node `{self.jsonpath}`
                 more than once during model-building.
                 """
             )
-        self.childrens[key] = child
+        self.children[key] = child
 
     @Node.cached
     def intersects(self, row: CanGetItem) -> bool:
-        return any(map(lambda node: node.intersects(row), self.childrens.values()))
+        return any(map(lambda node: node.intersects(row), self.children.values()))
 
 
 class ObjectNode(InternalNode):
@@ -120,7 +120,7 @@ class ObjectNode(InternalNode):
     def get_value(self, row: CanGetItem) -> Dict[str, Nodal]:
         return {
             key: node.get_value(row)
-            for key, node in self.childrens.items()
+            for key, node in self.children.items()
             if node.intersects(row)
         }
 
@@ -131,14 +131,14 @@ class ArrayNode(InternalNode):
 
     @Node.protected
     def get_value(self, row: CanGetItem) -> List[Nodal]:
-        length = len(self.childrens)
+        length = len(self.children)
         for n in range(0, length):
-            if str(n) not in self.childrens:
+            if str(n) not in self.children:
                 raise self.MissingArrayIndexException(
                     f"Missing a JSONPath of the format `{self.jsonpath}[{n}]***`."
                 )
         list_: List[Nodal] = []
         for n in range(0, length):
-            if self.childrens[str(n)].intersects(row):
-                list_.append(self.childrens[str(n)].get_value(row))
+            if self.children[str(n)].intersects(row):
+                list_.append(self.children[str(n)].get_value(row))
         return list_
