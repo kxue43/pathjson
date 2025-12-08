@@ -3,5 +3,4 @@ __pycache__/
 /adhoc
 /.venv
 /.vscode
-.python-version
 *.egg-info/
