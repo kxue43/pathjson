@@ -1,15 +1,60 @@
-[build-system]
-requires = [
-    "setuptools>=56",
-    "wheel"
+[project]
+name = "pathjson"
+
+version = "0.2.0"
+
+authors = [
+    { name = "Ke Xue", email = "xueke.kent@gmail.com" },
 ]
-build-backend = "setuptools.build_meta"
+
+description = "Assemble JSONPath-value pairs back to JSON object."
+
+readme = "README.md"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+requires-python = ">=3.10"
+
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "black==25.11.0",
+    "flake8==7.3.0",
+    "mypy>=1.19.0",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "pytest>=9.0.2",
+]
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+
+target-version = ['py310']
 
 [tool.pytest.ini_options]
 testpaths = [
     "tests"
 ]
+
+[build-system]
+requires = [
+    "setuptools>=67",
+    "wheel"
+]
+
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+zip-safe = false
+
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pathjson = ["py.typed"]

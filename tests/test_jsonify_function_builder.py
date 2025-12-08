@@ -54,7 +54,7 @@ def dataframe_and_output() -> Tuple[pd.DataFrame, List[Dict[str, Any]]]:
 
 
 def test_jsonify_function_builder_functional(
-    dataframe_and_output: Tuple[pd.DataFrame, List[Dict[str, Any]]]
+    dataframe_and_output: Tuple[pd.DataFrame, List[Dict[str, Any]]],
 ) -> None:
     df, expected_output = dataframe_and_output
     jsonify_function = JsonifyFunctionBuilder[pd.Series](df.columns).build()
