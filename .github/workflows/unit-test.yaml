@@ -3,23 +3,23 @@ name: Unit Test
 on:
   push:
     branches:
-      - main
+      - master
     paths:
-      - 'src/**.py'
-      - 'tests/**'
-      - 'uv.lock'
+      - "src/**.py"
+      - "tests/**"
+      - "uv.lock"
 
   pull_request:
     paths:
-      - 'src/**.py'
-      - 'tests/**'
-      - 'uv.lock'
+      - "src/**.py"
+      - "tests/**"
+      - "uv.lock"
 
   workflow_call:
 
   workflow_dispatch:
 
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 

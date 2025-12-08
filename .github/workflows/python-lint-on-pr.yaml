@@ -3,7 +3,7 @@ name: Python - Lint on PR
 on:
   pull_request:
     branches:
-      - main
+      - master
     paths:
       - "src/**.py"
       - "tests/**.py"
