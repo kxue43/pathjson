@@ -28,6 +28,7 @@ def dataframe_and_output() -> Tuple[pd.DataFrame, List[Dict[str, Any]]]:
             "C": [4, 5, 6],
         },
     ]
+
     df: pd.DataFrame = pd.DataFrame(
         [
             {
@@ -49,14 +50,19 @@ def dataframe_and_output() -> Tuple[pd.DataFrame, List[Dict[str, Any]]]:
             },
         ],
     )
+
     df.replace(np.nan, None, inplace=True)
+
     return df, converted
 
 
 def test_jsonify_function_builder_functional(
-    dataframe_and_output: Tuple[pd.DataFrame, List[Dict[str, Any]]]
+    dataframe_and_output: Tuple[pd.DataFrame, List[Dict[str, Any]]],
 ) -> None:
     df, expected_output = dataframe_and_output
+
     jsonify_function = JsonifyFunctionBuilder[pd.Series](df.columns).build()
+
     result = list(map(lambda t: jsonify_function(t[1]), df.iterrows()))
+
     assert result == expected_output
