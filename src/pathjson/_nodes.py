@@ -54,7 +54,6 @@ class Node[S: Node](ABC):
         @wraps(intersects)
         def cached_intersects(self: S, row: CanGetItem) -> bool:
             if self._last_checked_row is row:
-
                 return self._intersected_last_time
 
             self._intersected_last_time = intersects(self, row)
