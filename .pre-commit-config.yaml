@@ -1,9 +1,24 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 25.11.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.9
     hooks:
-      - id: black
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.3.0
+      - id: ruff-check
+      - id: ruff-format
+
+  - repo: https://github.com/kxue43/shell-cmd-on-change
+    rev: "2.0.0"
     hooks:
-      - id: flake8
+      - id: shell-cmd-on-change
+        name: uv-sync
+        args:
+          - "-Ppyproject.toml"
+          - "-Puv.lock"
+          - "uv sync"
+        stages: [post-merge]
+        always_run: true
+        verbose: true
+
+  - repo: https://github.com/godaddy/tartufo
+    rev: "v6.0.0"
+    hooks:
+      - id: tartufo

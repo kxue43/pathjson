@@ -22,18 +22,12 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "black==25.11.0",
-    "flake8==7.3.0",
     "mypy>=1.19.0",
     "numpy>=2.2.6",
     "pandas>=2.3.3",
     "pytest>=9.0.2",
+    "ruff>=0.14.9",
 ]
-
-[tool.black]
-line-length = 88
-
-target-version = ['py310']
 
 [tool.pytest.ini_options]
 testpaths = [
