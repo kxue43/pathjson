@@ -4,7 +4,7 @@ name = "pathjson"
 version = "0.2.0"
 
 authors = [
-    { name = "Ke Xue", email = "xueke.kent@gmail.com" },
+    { name = "Sate Seinosuke", email = "kxue43@gmail.com" },
 ]
 
 description = "Assemble JSONPath-value pairs back to JSON object."
